@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './App.css';
 import Login from './Login';
 import Player from './Player';
-import { useEffect, useState } from 'react';
 import { getTokenFromResponse } from './spotify';
 import  SpotifyWebApi from 'spotify-web-api-js';
 import { useStateProviderValue } from './StateProvider';
@@ -11,7 +10,7 @@ import { useStateProviderValue } from './StateProvider';
 const spotify = new SpotifyWebApi();
 
 function App() {
-  const [{ user, token }, dispatch] = useStateProviderValue();
+  const [{ token }, dispatch] = useStateProviderValue();
 
   // Run code base on a given condition
   useEffect(() => {
@@ -34,8 +33,35 @@ function App() {
           user: user,
         });
       });
+
+        spotify.getMyTopArtists().then((response) =>
+        dispatch({
+          type: "SET_TOP_ARTISTS",
+          top_artists: response,
+        })
+      );
+
+
+      spotify.getUserPlaylists().then((playlists) => {
+        dispatch({
+          type: 'SET_PLAYLISTS',
+          playlists,
+        });
+      });
+
+      spotify.getPlaylist(`${token}`).then(response => {
+        dispatch({
+          type: 'SET_DISCOBER_WEEKLY',
+          discover_weekly: response,
+        });
+      });
+
+      dispatch({
+        type: "SET_SPOTIFY",
+        s: spotify,
+      });
     }
-  }, []);
+  }, [token,dispatch]);
 
 
 
